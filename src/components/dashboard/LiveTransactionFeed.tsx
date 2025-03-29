@@ -53,7 +53,7 @@ const LiveTransactionFeed: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            <p className="font-mono font-bold text-white">${transaction.amount.toFixed(2)}</p>
+            <p className="font-mono font-bold text-white">₹{transaction.amount.toFixed(2)}</p>
             <div className={`h-6 px-2 rounded-full flex items-center text-xs gap-1 ${
               transaction.status === 'processing' 
                 ? 'bg-yellow-500/20 text-yellow-300' 

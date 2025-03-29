@@ -92,8 +92,9 @@ const Index = () => {
                 <Fingerprint className="h-6 w-6 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
               </div>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-              BioHoloPay
+            <span className="text-xl font-bold">
+              <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent animate-text-gradient">Bio</span>
+              <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent animate-text-gradient" style={{ animationDelay: '0.5s' }}>Pay</span>
             </span>
           </div>
           
@@ -120,14 +121,6 @@ const Index = () => {
           </div>
           
           <div className="flex gap-2">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/dashboard')}
-              className="text-white hover:text-white hover:bg-white/10 relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 w-1/12 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-              Dashboard
-            </Button>
             <Button 
               variant="ghost" 
               onClick={() => navigate('/login')}
@@ -338,7 +331,7 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-white">$47.28</p>
+                  <p className="text-lg font-bold text-white">₹47.28</p>
                   <p className="text-xs text-green-400">Verified</p>
                 </div>
               </div>
@@ -354,7 +347,7 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-white">$40.08</p>
+                  <p className="text-lg font-bold text-white">₹40.08</p>
                   <p className="text-xs text-green-400">Verified</p>
                 </div>
               </div>
@@ -370,7 +363,7 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-white">$15.99</p>
+                  <p className="text-lg font-bold text-white">₹15.99</p>
                   <p className="text-xs text-green-400">Verified</p>
                 </div>
               </div>
@@ -385,7 +378,7 @@ const Index = () => {
                   </div>
                   <div>
                     <p className="text-white/60 text-sm">Total Daily Volume</p>
-                    <h3 className="text-3xl font-bold text-white">$12,459.20</h3>
+                    <h3 className="text-3xl font-bold text-white">₹12,459.20</h3>
                   </div>
                 </div>
               </div>
@@ -445,8 +438,9 @@ const Index = () => {
                 <div className="bg-cyan-400/20 p-2 rounded-lg">
                   <Fingerprint className="h-6 w-6 text-cyan-400" />
                 </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                  BioHoloPay
+                <span className="text-xl font-bold">
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent animate-text-gradient">Bio</span>
+                  <span className="bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent animate-text-gradient" style={{ animationDelay: '0.5s' }}>Pay</span>
                 </span>
               </div>
               <p className="text-white/60 text-sm mb-4">
@@ -501,7 +495,7 @@ const Index = () => {
           </div>
           
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-white/40 text-sm">© 2023 BioHoloPay. All rights reserved.</p>
+            <p className="text-white/40 text-sm">© 2023 BioPay. All rights reserved.</p>
             
             <div className="flex gap-6">
               <a href="#" className="text-white/40 text-sm hover:text-white transition-colors">Privacy Policy</a>

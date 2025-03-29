@@ -6,12 +6,18 @@ import PaymentRequest from '@/components/payments/PaymentRequest';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { ReceiptIndianRupee, Download } from 'lucide-react';
 
 const Payments = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"pay" | "request">("pay");
   const [note, setNote] = useState<string>("");
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [paymentRecipient, setPaymentRecipient] = useState<string>("");
+  const [showReceiptOption, setShowReceiptOption] = useState(false);
+  const [lastTransactionId, setLastTransactionId] = useState<string | number | null>(null);
   
   // Check if the URL has a request parameter
   useEffect(() => {
@@ -23,6 +29,8 @@ const Payments = () => {
   
   const handleCreatePaymentRequest = (values: any) => {
     console.log('Payment request created:', values);
+    setPaymentAmount(values.amount || 100);
+    setPaymentRecipient(values.recipient || "Demo Recipient");
   };
   
   const updateTransactionData = (amount: number, recipient: string) => {
@@ -41,11 +49,13 @@ const Payments = () => {
       }
       
       // Add the new transaction
+      const transactionId = Date.now();
       const newTransaction = {
-        id: Date.now(),
+        id: transactionId,
         amount: amount,
         recipient: recipient,
-        date: new Date().toISOString(),
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
         status: 'completed',
         type: activeTab === 'pay' ? 'outgoing' : 'incoming',
         note: note || 'No description provided'
@@ -56,8 +66,18 @@ const Payments = () => {
       // Update session storage
       sessionStorage.setItem('transactions', JSON.stringify(transactions));
       console.log('Transaction data updated:', newTransaction);
+      
+      // Trigger storage event for other components to listen
+      window.dispatchEvent(new Event('storage'));
+      
+      // Set the transaction ID for receipt download
+      setLastTransactionId(transactionId);
+      setShowReceiptOption(true);
+      
+      return transactionId;
     } catch (error) {
       console.error('Error updating transaction data:', error);
+      return null;
     }
   };
   
@@ -65,9 +85,12 @@ const Payments = () => {
     if (success) {
       toast.success('Payment completed successfully!');
       
-      // Update transaction data
+      // Update transaction data and balance
       if (data?.amount && data?.recipient) {
-        updateTransactionData(data.amount, data.recipient);
+        const transactionId = updateTransactionData(data.amount, data.recipient);
+        if (transactionId) {
+          setLastTransactionId(transactionId);
+        }
       }
       
       // After successful payment, display transaction confirmation with 3D effect
@@ -91,13 +114,83 @@ const Payments = () => {
         }, 1000);
       }, 2000);
       
+      // Show receipt download option
+      setShowReceiptOption(true);
+      
       // Navigate to dashboard after a delay to see the updated transaction
       setTimeout(() => {
         navigate('/dashboard');
       }, 3000);
     } else {
       toast.error('Payment failed. Please try again.');
+      setShowReceiptOption(false);
     }
+  };
+
+  // Function to download transaction receipt
+  const downloadReceipt = () => {
+    if (!lastTransactionId) return;
+    
+    // Fetch the transactions from session storage
+    const storedTransactions = sessionStorage.getItem('transactions');
+    if (!storedTransactions) return;
+    
+    const transactions = JSON.parse(storedTransactions);
+    const transaction = transactions.find((tx: any) => tx.id === lastTransactionId);
+    
+    if (!transaction) return;
+    
+    // Create the receipt content
+    const receiptContent = `
+      ======== TRANSACTION RECEIPT ========
+      
+      Bio Pay
+      
+      Date: ${transaction.date}
+      Time: ${transaction.time || 'N/A'}
+      
+      Transaction ID: ${transaction.id}
+      
+      ${transaction.type === 'incoming' ? 'From' : 'To'}: ${transaction.type === 'incoming' ? transaction.sender : transaction.recipient}
+      
+      Amount: ₹${transaction.amount.toFixed(2)}
+      
+      Status: ${transaction.status}
+      
+      Note: ${transaction.note || 'No description provided'}
+      
+      ===================================
+      
+      Thank you for using Bio Pay!
+    `;
+    
+    // Create a Blob from the receipt content
+    const blob = new Blob([receiptContent], { type: 'text/plain' });
+    
+    // Create a URL for the Blob
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary anchor element to trigger the download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt-${transaction.id}.txt`;
+    
+    // Trigger the download
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    // Show success message
+    toast.success('Receipt downloaded successfully!');
+  };
+  
+  const handlePaymentRequest = (values: any) => {
+    setPaymentAmount(values.amount || 0);
+    setPaymentRecipient(values.recipient || "Demo Recipient");
+    handleCreatePaymentRequest(values);
   };
   
   return (
@@ -128,13 +221,22 @@ const Payments = () => {
               />
             </div>
             <PaymentRequest 
-              onCreatePaymentRequest={handleCreatePaymentRequest}
+              onCreatePaymentRequest={handlePaymentRequest}
               onPaymentComplete={(success) => handlePaymentComplete(success, {
-                amount: 100, // This would come from the PaymentRequest component
-                recipient: "Demo Merchant" // This would come from the PaymentRequest component
+                amount: paymentAmount, 
+                recipient: paymentRecipient
               })}
               isMerchant={false}
             />
+            
+            {showReceiptOption && (
+              <div className="w-full max-w-md mx-auto mt-6 text-center">
+                <Button onClick={downloadReceipt} className="gap-2">
+                  <ReceiptIndianRupee className="h-4 w-4" />
+                  Download Receipt
+                </Button>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="request" className="mt-6">
@@ -149,13 +251,22 @@ const Payments = () => {
               />
             </div>
             <PaymentRequest 
-              onCreatePaymentRequest={handleCreatePaymentRequest}
+              onCreatePaymentRequest={handlePaymentRequest}
               onPaymentComplete={(success) => handlePaymentComplete(success, {
-                amount: 100, // This would come from the PaymentRequest component
-                recipient: "Demo Customer" // This would come from the PaymentRequest component
+                amount: paymentAmount,
+                recipient: paymentRecipient
               })}
               isMerchant={true}
             />
+            
+            {showReceiptOption && (
+              <div className="w-full max-w-md mx-auto mt-6 text-center">
+                <Button onClick={downloadReceipt} className="gap-2">
+                  <ReceiptIndianRupee className="h-4 w-4" />
+                  Download Receipt
+                </Button>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
