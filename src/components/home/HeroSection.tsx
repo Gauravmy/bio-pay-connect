@@ -12,6 +12,8 @@ interface HeroSectionProps {
 const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const [textColorIndex, setTextColorIndex] = useState(0);
+  const [logoScale, setLogoScale] = useState(1);
 
   // Update rotation based on mouse position for 3D effect
   useEffect(() => {
@@ -20,6 +22,30 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
       y: -mousePosition.x * 15
     });
   }, [mousePosition]);
+
+  // Text color animation effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTextColorIndex(prev => (prev + 1) % 3);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  // Logo pulse effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLogoScale(prev => prev === 1 ? 1.05 : 1);
+    }, 2000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const textColors = [
+    'text-cyan-400',
+    'text-blue-400',
+    'text-purple-400'
+  ];
 
   return (
     <div className="relative z-10 min-h-[80vh] flex flex-col items-center justify-center px-4 py-12">
@@ -37,7 +63,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
             }}
           ></div>
           
-          {/* 3D BioHoloPay Logo */}
+          {/* Enhanced 3D BioHoloPay Logo */}
           <div 
             className="relative mb-8 group perspective-1000"
             onMouseEnter={() => setIsHovered(true)}
@@ -47,8 +73,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
               className="relative transition-all duration-500 transform-gpu"
               style={{
                 transform: isHovered 
-                  ? `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)` 
-                  : 'rotateX(0) rotateY(0)'
+                  ? `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale3d(1.1, 1.1, 1.1)` 
+                  : `rotateX(0) rotateY(0) scale3d(${logoScale}, ${logoScale}, ${logoScale})`
               }}
             >
               <div className="flex items-center gap-2 mb-4">
@@ -59,17 +85,21 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
                   </div>
                   <div className="absolute -inset-1 border border-cyan-500/20 rounded-lg animate-spin-slow opacity-70"></div>
                 </div>
-                <span className="text-4xl font-bold bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent relative">
+                <span className="text-4xl font-bold relative">
                   <span className="absolute -inset-x-2 inset-y-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/5 blur-xl opacity-70 animate-pulse"></span>
-                  <span className="relative">BioHoloPay</span>
+                  <span className="relative">
+                    <span className="bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">Bio</span>
+                    <span className={`transition-colors duration-1000 ${textColors[textColorIndex]}`}>Pay</span>
+                  </span>
                 </span>
               </div>
               
-              {/* 3D effect layers */}
+              {/* Enhanced 3D effect layers with changing shadows */}
               <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/5 rounded-xl transform -translate-z-2 blur-sm"></div>
               <div className="absolute inset-0 border border-cyan-500/20 rounded-xl transform -translate-z-1"></div>
+              <div className="absolute inset-0 shadow-[0_0_15px_rgba(34,211,238,0.2)] rounded-xl animate-pulse"></div>
               
-              {/* Rotating icons around logo */}
+              {/* Rotating icons around logo with improved animations */}
               <div className="absolute -top-4 -right-8 animate-spin-slow" style={{ animationDuration: '15s' }}>
                 <Shield className="h-6 w-6 text-green-400/70" />
               </div>
@@ -82,8 +112,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
             </div>
           </div>
           
-          <p className="text-sm uppercase tracking-wider text-cyan-400 font-semibold mb-4 letter-spacing-2">
-            Next Generation Biometric Payment
+          {/* Glowing text effect */}
+          <p className="text-sm uppercase tracking-wider text-cyan-400 font-semibold mb-4 letter-spacing-2 relative">
+            <span className="absolute inset-0 blur-sm bg-cyan-400/20 rounded-full animate-pulse"></span>
+            <span className="relative">Next Generation Biometric Payment</span>
           </p>
           
           <h1 className="text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
@@ -127,26 +159,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
           </Button>
         </div>
 
-        {/* Feature badges */}
+        {/* Feature badges with subtle hover animations */}
         <div className="flex flex-wrap justify-center gap-4 mt-8">
-          <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 hover:bg-white/10 transition-all">
+          <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 hover:bg-white/10 transition-all hover:scale-105 transform-gpu duration-300">
             <Fingerprint className="h-4 w-4 text-cyan-400" />
             <span className="text-sm text-white/80">Fingerprint ID</span>
           </div>
-          <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 hover:bg-white/10 transition-all">
-            <Fingerprint className="h-4 w-4 text-purple-400" />
+          <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 hover:bg-white/10 transition-all hover:scale-105 transform-gpu duration-300">
+            <Shield className="h-4 w-4 text-purple-400" />
             <span className="text-sm text-white/80">Military-grade Encryption</span>
           </div>
-          <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 hover:bg-white/10 transition-all">
-            <Fingerprint className="h-4 w-4 text-green-400" />
+          <div className="bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 hover:bg-white/10 transition-all hover:scale-105 transform-gpu duration-300">
+            <Scan className="h-4 w-4 text-green-400" />
             <span className="text-sm text-white/80">Palm Vein Verification</span>
           </div>
         </div>
       </div>
       
-      {/* Scroll indicator */}
+      {/* Enhanced scroll indicator with pulsing effect */}
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce">
-        <div className="w-8 h-12 rounded-full border-2 border-white/30 flex justify-center p-2">
+        <div className="w-8 h-12 rounded-full border-2 border-white/30 flex justify-center p-2 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-cyan-500/10 animate-pulse"></div>
           <div className="w-1 h-3 bg-white/50 rounded-full animate-pulse"></div>
         </div>
         <span className="text-white/50 text-sm mt-2">Scroll to explore</span>

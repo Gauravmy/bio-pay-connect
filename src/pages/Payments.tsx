@@ -5,11 +5,13 @@ import MainLayout from '@/components/layout/MainLayout';
 import PaymentRequest from '@/components/payments/PaymentRequest';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 const Payments = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"pay" | "request">("pay");
+  const [note, setNote] = useState<string>("");
   
   // Check if the URL has a request parameter
   useEffect(() => {
@@ -23,9 +25,50 @@ const Payments = () => {
     console.log('Payment request created:', values);
   };
   
-  const handlePaymentComplete = (success: boolean) => {
+  const updateTransactionData = (amount: number, recipient: string) => {
+    try {
+      // Get current user data
+      const userData = sessionStorage.getItem('user');
+      if (!userData) return;
+      
+      const user = JSON.parse(userData);
+      
+      // Get or initialize transaction history
+      let transactions = [];
+      const storedTransactions = sessionStorage.getItem('transactions');
+      if (storedTransactions) {
+        transactions = JSON.parse(storedTransactions);
+      }
+      
+      // Add the new transaction
+      const newTransaction = {
+        id: Date.now(),
+        amount: amount,
+        recipient: recipient,
+        date: new Date().toISOString(),
+        status: 'completed',
+        type: activeTab === 'pay' ? 'outgoing' : 'incoming',
+        note: note || 'No description provided'
+      };
+      
+      transactions.unshift(newTransaction);
+      
+      // Update session storage
+      sessionStorage.setItem('transactions', JSON.stringify(transactions));
+      console.log('Transaction data updated:', newTransaction);
+    } catch (error) {
+      console.error('Error updating transaction data:', error);
+    }
+  };
+  
+  const handlePaymentComplete = (success: boolean, data?: { amount: number, recipient: string }) => {
     if (success) {
       toast.success('Payment completed successfully!');
+      
+      // Update transaction data
+      if (data?.amount && data?.recipient) {
+        updateTransactionData(data.amount, data.recipient);
+      }
       
       // After successful payment, display transaction confirmation with 3D effect
       const element = document.createElement('div');
@@ -74,17 +117,43 @@ const Payments = () => {
           </TabsList>
           
           <TabsContent value="pay" className="mt-6">
+            <div className="mb-4">
+              <label htmlFor="note" className="block text-sm font-medium mb-1">Add a note (optional)</label>
+              <Textarea 
+                id="note" 
+                placeholder="What's this payment for?" 
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="w-full max-w-md mx-auto"
+              />
+            </div>
             <PaymentRequest 
               onCreatePaymentRequest={handleCreatePaymentRequest}
-              onPaymentComplete={handlePaymentComplete}
+              onPaymentComplete={(success) => handlePaymentComplete(success, {
+                amount: 100, // This would come from the PaymentRequest component
+                recipient: "Demo Merchant" // This would come from the PaymentRequest component
+              })}
               isMerchant={false}
             />
           </TabsContent>
           
           <TabsContent value="request" className="mt-6">
+            <div className="mb-4">
+              <label htmlFor="requestNote" className="block text-sm font-medium mb-1">Add a note (optional)</label>
+              <Textarea 
+                id="requestNote" 
+                placeholder="What's this request for?" 
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="w-full max-w-md mx-auto"
+              />
+            </div>
             <PaymentRequest 
               onCreatePaymentRequest={handleCreatePaymentRequest}
-              onPaymentComplete={handlePaymentComplete}
+              onPaymentComplete={(success) => handlePaymentComplete(success, {
+                amount: 100, // This would come from the PaymentRequest component
+                recipient: "Demo Customer" // This would come from the PaymentRequest component
+              })}
               isMerchant={true}
             />
           </TabsContent>
