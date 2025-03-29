@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Fingerprint } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Fingerprint, Scan, Shield, Zap } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import HolographicButton from '@/components/ui/HolographicButton';
 
@@ -10,6 +10,17 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+
+  // Update rotation based on mouse position for 3D effect
+  useEffect(() => {
+    setRotation({
+      x: mousePosition.y * 15,
+      y: -mousePosition.x * 15
+    });
+  }, [mousePosition]);
+
   return (
     <div className="relative z-10 min-h-[80vh] flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-5xl text-center space-y-8 animate-fade-in">
@@ -26,15 +37,49 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
             }}
           ></div>
           
-          {/* Fingerprint icon with animation */}
-          <div className="relative group mb-6">
-            <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-md group-hover:bg-cyan-400/30 transition-all duration-500 animate-pulse"></div>
-            <div className="bg-gradient-to-br from-cyan-900/80 to-blue-900/80 p-6 rounded-full relative hover:scale-105 transition-transform duration-300 backdrop-blur-xl border border-cyan-500/30">
-              <Fingerprint className="h-14 w-14 text-cyan-400" />
+          {/* 3D BioHoloPay Logo */}
+          <div 
+            className="relative mb-8 group perspective-1000"
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <div 
+              className="relative transition-all duration-500 transform-gpu"
+              style={{
+                transform: isHovered 
+                  ? `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)` 
+                  : 'rotateX(0) rotateY(0)'
+              }}
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-cyan-400/30 rounded-lg blur-md group-hover:bg-cyan-400/50 transition-all duration-300"></div>
+                  <div className="bg-cyan-900/80 p-3 rounded-lg relative backdrop-blur-sm group-hover:scale-105 transition-transform duration-300 border border-cyan-500/30">
+                    <Fingerprint className="h-10 w-10 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                  </div>
+                  <div className="absolute -inset-1 border border-cyan-500/20 rounded-lg animate-spin-slow opacity-70"></div>
+                </div>
+                <span className="text-4xl font-bold bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent relative">
+                  <span className="absolute -inset-x-2 inset-y-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/5 blur-xl opacity-70 animate-pulse"></span>
+                  <span className="relative">BioHoloPay</span>
+                </span>
+              </div>
+              
+              {/* 3D effect layers */}
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/5 rounded-xl transform -translate-z-2 blur-sm"></div>
+              <div className="absolute inset-0 border border-cyan-500/20 rounded-xl transform -translate-z-1"></div>
+              
+              {/* Rotating icons around logo */}
+              <div className="absolute -top-4 -right-8 animate-spin-slow" style={{ animationDuration: '15s' }}>
+                <Shield className="h-6 w-6 text-green-400/70" />
+              </div>
+              <div className="absolute -bottom-4 -left-8 animate-spin-slow" style={{ animationDuration: '12s', animationDirection: 'reverse' }}>
+                <Scan className="h-6 w-6 text-blue-400/70" />
+              </div>
+              <div className="absolute -bottom-6 -right-10 animate-spin-slow" style={{ animationDuration: '18s' }}>
+                <Zap className="h-6 w-6 text-amber-400/70" />
+              </div>
             </div>
-            
-            {/* Rotating glow circle */}
-            <div className="absolute -inset-2 border border-cyan-500/30 rounded-full animate-spin-slow"></div>
           </div>
           
           <p className="text-sm uppercase tracking-wider text-cyan-400 font-semibold mb-4 letter-spacing-2">

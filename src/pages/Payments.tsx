@@ -26,10 +26,32 @@ const Payments = () => {
   const handlePaymentComplete = (success: boolean) => {
     if (success) {
       toast.success('Payment completed successfully!');
-      // In a real app, we would update the transaction history
+      
+      // After successful payment, display transaction confirmation with 3D effect
+      const element = document.createElement('div');
+      element.className = 'fixed inset-0 flex items-center justify-center z-50 pointer-events-none';
+      element.innerHTML = `
+        <div class="bg-gradient-to-r from-cyan-500/20 to-blue-500/10 p-8 rounded-xl text-white text-center transform transition-all duration-1000 animate-fade-in backdrop-blur-xl border border-white/10">
+          <div class="text-6xl mb-4">💫</div>
+          <div class="text-2xl font-bold text-white mb-2">Transaction Successful!</div>
+          <div class="text-white/70">Your account has been updated</div>
+        </div>
+      `;
+      
+      document.body.appendChild(element);
+      
+      // Remove the element after animation
+      setTimeout(() => {
+        element.classList.add('opacity-0');
+        setTimeout(() => {
+          document.body.removeChild(element);
+        }, 1000);
+      }, 2000);
+      
+      // Navigate to dashboard after a delay to see the updated transaction
       setTimeout(() => {
         navigate('/dashboard');
-      }, 2000);
+      }, 3000);
     } else {
       toast.error('Payment failed. Please try again.');
     }
