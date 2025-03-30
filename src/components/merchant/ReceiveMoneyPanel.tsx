@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { X, ChevronLeft, CheckCircle, Fingerprint, QrCode as QrCodeIcon } from 'lucide-react';
+import { X, ChevronLeft, CheckCircle, Fingerprint, QRCode as QrCodeIcon } from 'lucide-react';
 import QRCode from 'qrcode.react';
 import FingerPrintScanner from '../auth/FingerPrintScanner';
 import { motion, AnimatePresence } from 'framer-motion';

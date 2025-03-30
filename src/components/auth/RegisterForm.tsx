@@ -108,18 +108,23 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
   };
 
   // Ensure we pass a valid userData object to MerchantVerification
-  const getMerchantVerificationData = (): {
-    name: string;
-    email: string;
-    mobile: string;
-    userType: string;
-  } => {
-    // Always return an object with required properties
+  const getMerchantVerificationData = () => {
+    if (!formValues) {
+      // Provide a default object with all required properties
+      return {
+        name: "",
+        email: "",
+        mobile: "",
+        userType: "merchant"
+      };
+    }
+    
+    // Return the formValues which we know has all required properties
     return {
-      name: formValues?.name || "",
-      email: formValues?.email || "",
-      mobile: formValues?.mobile || "",
-      userType: formValues?.userType || "merchant"
+      name: formValues.name,
+      email: formValues.email,
+      mobile: formValues.mobile,
+      userType: formValues.userType
     };
   };
 
