@@ -1,6 +1,4 @@
-Here's a well-structured and clean **README.md** file for your project:  
 
----
 
 # 🚀 Project Name  
 
@@ -79,6 +77,3 @@ Contributions are welcome! Feel free to open a **pull request** or create an **i
 
 This project is **open-source** and available under the **MIT License**.  
 
----  
-
-This README follows best practices, making it **clear, concise, and structured**. Let me know if you'd like any modifications! 🚀
