@@ -10,7 +10,9 @@ import {
   UserPlus,
   Zap,
   QrCode,
-  Check 
+  Check,
+  ChevronRight,
+  ReceiptIndianRupee
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +24,19 @@ import WalletCard from "@/components/wallet/WalletCard";
 import TransactionItem from "@/components/wallet/TransactionItem";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
+import StatCard from "@/components/dashboard/StatCard";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
 
 const Dashboard = () => {
   const navigate = useNavigate();
