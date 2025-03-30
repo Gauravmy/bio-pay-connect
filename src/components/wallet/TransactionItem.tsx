@@ -4,16 +4,15 @@ import { ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface Transaction {
-  id?: string | number;
+  id: string;
   type: 'incoming' | 'outgoing';
   amount: number;
   currency?: string;
   recipient?: string;
   sender?: string;
   date: string;
-  time?: string;
-  status: 'completed' | 'pending' | 'failed' | 'scheduled';
-  note?: string;
+  time: string;
+  status: 'completed' | 'pending' | 'failed';
 }
 
 interface TransactionItemProps {
@@ -84,7 +83,6 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
               "capitalize",
               status === 'completed' ? "text-green-600" : 
               status === 'pending' ? "text-amber-600" : 
-              status === 'scheduled' ? "text-blue-600" :
               "text-red-600"
             )}>
               {status}

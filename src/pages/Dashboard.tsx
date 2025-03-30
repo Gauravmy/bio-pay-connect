@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from '@/components/layout/MainLayout';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, ReceiptIndianRupee, CreditCard, ChevronRight, QrCode, Wallet } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, DollarSign, CreditCard, ChevronRight, QrCode, ReceiptIndianRupee, Wallet, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import WalletCard from '@/components/wallet/WalletCard';
 import TransactionItem from '@/components/wallet/TransactionItem';
@@ -14,34 +13,12 @@ import StatCard from '@/components/dashboard/StatCard';
 const Dashboard = () => {
   const [showReceiveMoney, setShowReceiveMoney] = useState(false);
   const [userData, setUserData] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
   
   useEffect(() => {
-    // Fetch user data from session storage
     const storedUser = sessionStorage.getItem('user');
     if (storedUser) {
       setUserData(JSON.parse(storedUser));
     }
-    
-    // Fetch transaction data from session storage
-    const storedTransactions = sessionStorage.getItem('transactions');
-    if (storedTransactions) {
-      setTransactions(JSON.parse(storedTransactions));
-    }
-    
-    // Add event listener to watch for changes in session storage
-    const handleStorageChange = () => {
-      const updatedTransactions = sessionStorage.getItem('transactions');
-      if (updatedTransactions) {
-        setTransactions(JSON.parse(updatedTransactions));
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
   }, []);
 
   const isMerchant = userData?.userType === 'merchant';
@@ -66,109 +43,43 @@ const Dashboard = () => {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-  // Get the most recent transactions from session storage
-  const recentTransactions = transactions.length > 0 
-    ? transactions.slice(0, 4) 
-    : [
-        {
-          id: 1,
-          amount: 45.99,
-          type: 'outgoing',
-          date: 'Today, 14:35'
-        },
-        {
-          id: 2,
-          amount: 1250.00,
-          type: 'incoming',
-          date: 'Yesterday, 09:10'
-        },
-        {
-          id: 3,
-          amount: 29.99,
-          type: 'outgoing',
-          date: 'Jun 24, 19:45'
-        },
-        {
-          id: 4,
-          amount: 120.50,
-          type: 'incoming',
-          date: 'Jun 22, 14:00'
-        }
-      ];
-
-  // Calculate wallet balance based on transactions
-  const calculateBalance = () => {
-    if (transactions.length === 0) return 2584.23;
-    
-    let balance = 2584.23; // Starting balance
-    transactions.forEach(tx => {
-      if (tx.type === 'incoming') {
-        balance += tx.amount;
-      } else {
-        balance -= tx.amount;
-      }
-    });
-    return balance;
-  };
-  
-  const balance = calculateBalance();
+  const recentTransactions = [
+    {
+      id: 1,
+      amount: 45.99,
+      type: 'outgoing' as const,
+      date: 'Today, 14:35'
+    },
+    {
+      id: 2,
+      amount: 1250.00,
+      type: 'incoming' as const,
+      date: 'Yesterday, 09:10'
+    },
+    {
+      id: 3,
+      amount: 29.99,
+      type: 'outgoing' as const,
+      date: 'Jun 24, 19:45'
+    },
+    {
+      id: 4,
+      amount: 120.50,
+      type: 'incoming' as const,
+      date: 'Jun 22, 14:00'
+    }
+  ];
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-IN', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'INR',
+      currency: 'USD',
       minimumFractionDigits: 2
     }).format(value);
   };
 
   const toggleReceiveMoney = () => {
     setShowReceiveMoney(!showReceiveMoney);
-  };
-  
-  // Function to download transaction receipt
-  const downloadReceipt = (transaction: any) => {
-    // Create the receipt content
-    const receiptContent = `
-      ======== TRANSACTION RECEIPT ========
-      
-      Bio Pay
-      
-      Date: ${transaction.date}
-      Time: ${transaction.time || 'N/A'}
-      
-      Transaction ID: ${transaction.id}
-      
-      ${transaction.type === 'incoming' ? 'From' : 'To'}: ${transaction.type === 'incoming' ? transaction.sender : transaction.recipient}
-      
-      Amount: ₹${transaction.amount.toFixed(2)}
-      
-      Status: ${transaction.status}
-      
-      Note: ${transaction.note || 'No description provided'}
-      
-      ===================================
-      
-      Thank you for using Bio Pay!
-    `;
-    
-    // Create a Blob from the receipt content
-    const blob = new Blob([receiptContent], { type: 'text/plain' });
-    
-    // Create a URL for the Blob
-    const url = URL.createObjectURL(blob);
-    
-    // Create a temporary anchor element to trigger the download
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `receipt-${transaction.id}.txt`;
-    
-    // Trigger the download
-    document.body.appendChild(a);
-    a.click();
-    
-    // Clean up
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   };
 
   return (
@@ -223,9 +134,8 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <WalletCard 
               title="Current Balance"
-              value={balance}
-              currency="₹"
-              icon={<Wallet className="h-5 w-5 text-primary" />}
+              value={2584.23}
+              icon={<DollarSign className="h-5 w-5 text-primary" />}
               trend={{
                 value: 12.5,
                 direction: 'up',
@@ -235,7 +145,6 @@ const Dashboard = () => {
             <WalletCard 
               title="Money Spent"
               value={1248.35}
-              currency="₹"
               icon={<ArrowUpRight className="h-5 w-5 text-destructive" />}
               trend={{
                 value: 8.2,
@@ -247,7 +156,6 @@ const Dashboard = () => {
             <WalletCard 
               title="Money Received"
               value={3482.55}
-              currency="₹"
               icon={<ArrowDownRight className="h-5 w-5 text-green-500" />}
               trend={{
                 value: 15.3,
@@ -328,33 +236,40 @@ const Dashboard = () => {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle>Recent Transactions</CardTitle>
-                  <Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => navigate('/transactions')}>
+                  <Button variant="outline" size="sm" className="h-8 gap-1">
                     View All <ChevronRight className="h-4 w-4" />
                   </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentTransactions.map((transaction, index) => (
-                      <div key={transaction.id || index} className="flex items-center">
-                        <TransactionItem
-                          transaction={transaction}
-                          merchant={transaction.recipient || transaction.sender}
-                          amount={transaction.amount}
-                          date={transaction.date}
-                          status={transaction.status || 'completed'}
-                          type={transaction.type}
-                          className="flex-grow"
-                        />
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => downloadReceipt(transaction)}
-                          className="ml-2"
-                        >
-                          <ReceiptIndianRupee className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                    <TransactionItem
+                      merchant="Amazon"
+                      amount={42.99}
+                      date="Today, 14:35"
+                      status="completed"
+                      type="outgoing"
+                    />
+                    <TransactionItem
+                      merchant="Payroll"
+                      amount={2450.00}
+                      date="Yesterday, 09:10"
+                      status="completed"
+                      type="incoming"
+                    />
+                    <TransactionItem
+                      merchant="Uber"
+                      amount={12.50}
+                      date="Jun 24, 19:45"
+                      status="completed"
+                      type="outgoing"
+                    />
+                    <TransactionItem
+                      merchant="Spotify"
+                      amount={9.99}
+                      date="Jun 22, 00:00"
+                      status="scheduled"
+                      type="outgoing"
+                    />
                   </div>
                 </CardContent>
               </Card>
