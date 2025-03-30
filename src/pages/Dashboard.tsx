@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MainLayout from '@/components/layout/MainLayout';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, DollarSign, CreditCard, ChevronRight, QrCode, ReceiptIndianRupee, Wallet, User } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, ReceiptIndianRupee, CreditCard, ChevronRight, QrCode, ReceiptIndianRupee as RupeeIcon, Wallet, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import WalletCard from '@/components/wallet/WalletCard';
 import TransactionItem from '@/components/wallet/TransactionItem';
@@ -135,7 +136,7 @@ const Dashboard = () => {
             <WalletCard 
               title="Current Balance"
               value={2584.23}
-              icon={<DollarSign className="h-5 w-5 text-primary" />}
+              icon={<RupeeIcon className="h-5 w-5 text-primary" />}
               trend={{
                 value: 12.5,
                 direction: 'up',
@@ -302,3 +303,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
