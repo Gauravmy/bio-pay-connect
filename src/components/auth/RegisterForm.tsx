@@ -20,6 +20,7 @@ import OtpVerification from './OtpVerification';
 import { toast } from "sonner";
 import MerchantVerification from './MerchantVerification';
 
+// Updated mobile regex to accept proper 10-digit Indian mobile numbers
 const mobileRegex = /^[6-9]\d{9}$/;
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -59,6 +60,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
       mobile: "",
       userType: "customer",
     },
+    mode: "onChange", // Added to validate on change
   });
 
   const handleFormSubmit = (values: FormValues) => {
@@ -183,7 +185,23 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                     <FormControl>
                       <div className="relative">
                         <SmartphoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cyan-400" />
-                        <Input placeholder="Enter your 10-digit mobile number" className="pl-10 bg-black/20 border-cyan-800/30 text-white" {...field} />
+                        <Input 
+                          placeholder="Enter your 10-digit mobile number" 
+                          className="pl-10 bg-black/20 border-cyan-800/30 text-white" 
+                          type="tel" 
+                          inputMode="numeric"
+                          pattern="[6-9][0-9]{9}" 
+                          maxLength={10}
+                          {...field} 
+                          onChange={(e) => {
+                            // Only allow numbers
+                            const value = e.target.value.replace(/[^0-9]/g, '');
+                            // Limit to 10 digits
+                            const truncatedValue = value.slice(0, 10);
+                            // Update the field with the cleaned value
+                            field.onChange(truncatedValue);
+                          }}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
