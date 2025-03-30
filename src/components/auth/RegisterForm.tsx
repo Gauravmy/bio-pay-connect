@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -128,7 +129,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
       {stage === 'form' && (
         <>
           <div className="text-center">
-            <h2 className="text-2xl font-semibold tracking-tight">Create your account</h2>
+            <h2 className="text-2xl font-semibold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Create your account</h2>
             <p className="text-muted-foreground mt-2">
               Enter your details to register a new account
             </p>
@@ -144,11 +145,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel className="text-white">Full Name</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Enter your full name" className="pl-10" {...field} />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cyan-400" />
+                        <Input placeholder="Enter your full name" className="pl-10 bg-black/20 border-cyan-800/30 text-white" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -161,11 +162,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email Address</FormLabel>
+                    <FormLabel className="text-white">Email Address</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Enter your email address" className="pl-10" type="email" {...field} />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cyan-400" />
+                        <Input placeholder="Enter your email address" className="pl-10 bg-black/20 border-cyan-800/30 text-white" type="email" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -178,11 +179,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                 name="mobile"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Mobile Number</FormLabel>
+                    <FormLabel className="text-white">Mobile Number</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <SmartphoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Enter your 10-digit mobile number" className="pl-10" {...field} />
+                        <SmartphoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-cyan-400" />
+                        <Input placeholder="Enter your 10-digit mobile number" className="pl-10 bg-black/20 border-cyan-800/30 text-white" {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -195,7 +196,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                 name="userType"
                 render={({ field }) => (
                   <FormItem className="space-y-3">
-                    <FormLabel>Account Type</FormLabel>
+                    <FormLabel className="text-white">Account Type</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -214,7 +215,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                           >
                             <div className="flex flex-col items-center">
                               <User className="h-8 w-8 mb-2 text-cyan-400" />
-                              <span className="text-sm font-medium">Customer</span>
+                              <span className="text-sm font-medium text-white">Customer</span>
                               <span className="text-xs text-muted-foreground mt-1">Personal use</span>
                             </div>
                           </label>
@@ -232,7 +233,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
                           >
                             <div className="flex flex-col items-center">
                               <Building2 className="h-8 w-8 mb-2 text-cyan-400" />
-                              <span className="text-sm font-medium">Merchant</span>
+                              <span className="text-sm font-medium text-white">Merchant</span>
                               <span className="text-xs text-muted-foreground mt-1">Business use</span>
                             </div>
                           </label>
@@ -260,7 +261,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
           <div className="text-center">
             <p className="text-sm text-muted-foreground">
               Already have an account?{" "}
-              <a href="/login" className="text-primary hover:underline">
+              <a href="/login" className="text-cyan-400 hover:underline">
                 Login
               </a>
             </p>
@@ -288,7 +289,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
       {stage === 'fingerprint' && (
         <div className="text-center space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Register Your Fingerprint</h2>
+            <h2 className="text-2xl font-semibold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Register Your Fingerprint</h2>
             <p className="text-muted-foreground mt-2">
               Please scan your fingerprint to complete registration
             </p>
@@ -315,7 +316,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSubmit }) => {
             <Button 
               variant="outline" 
               onClick={() => formValues?.userType === "merchant" ? setStage('merchantVerification') : setStage('otp')}
-              className="mt-4"
+              className="mt-4 border-cyan-800/50 text-cyan-400 hover:bg-cyan-950/30 hover:text-cyan-300"
             >
               Go Back
             </Button>
