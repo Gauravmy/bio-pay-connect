@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -10,12 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { HandMetal, ArrowRight, CreditCard, Banknote, Wallet } from 'lucide-react';
+import { HandMetal, ArrowRight, CreditCard, Banknote, Wallet, IndianRupee } from 'lucide-react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-// Define the schema for the payment form
 const vendorSchema = z.object({
   amount: z.string().min(1, "Amount is required").refine(val => !isNaN(Number(val)) && Number(val) > 0, {
     message: "Amount must be a positive number",
@@ -40,7 +38,6 @@ const Payments = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"vendor" | "user">("vendor");
   
-  // Vendor form
   const vendorForm = useForm<VendorFormValues>({
     resolver: zodResolver(vendorSchema),
     defaultValues: {
@@ -50,7 +47,6 @@ const Payments = () => {
     }
   });
 
-  // User form
   const userForm = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: {
@@ -60,7 +56,6 @@ const Payments = () => {
     }
   });
   
-  // Check if the URL has a request parameter
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     if (searchParams.get('user') === 'true') {
@@ -92,7 +87,6 @@ const Payments = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Vendor Panel */}
             <Card className="bg-card/80 backdrop-blur-xl border border-cyan-800/30 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-center md:text-left">Vendor Panel</CardTitle>
@@ -113,7 +107,7 @@ const Payments = () => {
                         className="pl-8"
                         {...vendorForm.register("amount")}
                       />
-                      <ReceiptIndianRupee className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <IndianRupee className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     </div>
                     {vendorForm.formState.errors.amount && (
                       <p className="text-red-500 text-sm">{vendorForm.formState.errors.amount.message}</p>
@@ -159,7 +153,6 @@ const Payments = () => {
               </CardFooter>
             </Card>
             
-            {/* User Panel */}
             <Card className="bg-card/80 backdrop-blur-xl border border-blue-800/30 shadow-lg">
               <CardHeader>
                 <CardTitle className="text-xl text-center md:text-left">User Panel</CardTitle>
@@ -180,7 +173,7 @@ const Payments = () => {
                         className="pl-8"
                         {...userForm.register("amount")}
                       />
-                      <ReceiptIndianRupee className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <IndianRupee className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                     </div>
                     {userForm.formState.errors.amount && (
                       <p className="text-red-500 text-sm">{userForm.formState.errors.amount.message}</p>
@@ -237,7 +230,6 @@ const Payments = () => {
             </Card>
           </div>
           
-          {/* Payment Methods Section */}
           <div className="mt-12 space-y-6">
             <h2 className="text-xl font-semibold tracking-tight">Payment Methods</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
