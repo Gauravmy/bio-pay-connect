@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowRight, Scan, ShieldCheck, Zap } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import HolographicButton from '@/components/ui/HolographicButton';
 
@@ -10,6 +10,26 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [scanLine, setScanLine] = useState(0);
+  
+  // Animate scan line
+  useEffect(() => {
+    if (!isHovered) return;
+    
+    const interval = setInterval(() => {
+      setScanLine(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev + 2;
+      });
+    }, 20);
+    
+    return () => clearInterval(interval);
+  }, [isHovered]);
+
   return (
     <div className="relative z-10 min-h-[90vh] flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
@@ -28,8 +48,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
             </h1>
             
             <p className="text-lg text-white/70 max-w-2xl mt-6">
-              Secure, fast, and convenient payments using advanced fingerprint and palm vein 
-              recognition technology. No cards, no passwords, just you.
+              Secure, fast, and convenient payments using advanced palm vein 
+              recognition technology with real-time processing. Experience the future of payments today.
             </p>
           </div>
           
@@ -44,7 +64,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
             </HolographicButton>
             
             <Button 
-              onClick={() => navigate('/fingerprint-scan')} 
+              onClick={() => navigate('/palm-vein-scan')} 
               variant="outline" 
               className="py-6 px-8 text-lg font-medium text-white border-white/20 bg-white/5 hover:bg-white/10 hover:text-white backdrop-blur-sm"
               size="lg"
@@ -52,19 +72,103 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
               Watch Demo
             </Button>
           </div>
+          
+          {/* Feature badges */}
+          <div className="flex flex-wrap gap-3 mt-8">
+            <div className="flex items-center gap-2 bg-cyan-900/30 text-cyan-400 px-3 py-1.5 rounded-full text-sm">
+              <ShieldCheck className="w-4 h-4" /> Military-grade security
+            </div>
+            <div className="flex items-center gap-2 bg-purple-900/30 text-purple-400 px-3 py-1.5 rounded-full text-sm">
+              <Scan className="w-4 h-4" /> Biometric authentication
+            </div>
+            <div className="flex items-center gap-2 bg-amber-900/30 text-amber-400 px-3 py-1.5 rounded-full text-sm">
+              <Zap className="w-4 h-4" /> Real-time transactions
+            </div>
+          </div>
         </div>
         
-        {/* Right side - Floating feature cards */}
-        <div className="w-full md:w-2/5 relative h-[400px] mt-8 md:mt-0"
+        {/* Right side - Interactive palm scanning simulation */}
+        <div 
+          className="w-full md:w-2/5 relative h-[400px] mt-8 md:mt-0"
           style={{
-            transform: `translate(${mousePosition.x * -10}px, ${mousePosition.y * -10}px)`
+            transform: `translate(${mousePosition.x * -5}px, ${mousePosition.y * -5}px)`
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => {
+            setIsHovered(false);
+            setScanLine(0);
           }}
         >
-          {/* Secure Authentication Card */}
+          {/* Palm scan visualization */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64">
+            <div className="relative w-full h-full">
+              {/* Hand outline graphic */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg 
+                  width="180" 
+                  height="180" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="1" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className={`text-cyan-400 transition-all duration-300 ${isHovered ? 'opacity-100 scale-110' : 'opacity-70 scale-100'}`}
+                >
+                  <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+                  <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+                  <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+                  <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+                </svg>
+              </div>
+
+              {/* Scan grid overlay */}
+              <div className="absolute inset-0 rounded-lg bg-[linear-gradient(0deg,rgba(0,255,204,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,204,0.05)_1px,transparent_1px)] bg-[size:8px_8px]"></div>
+              
+              {/* Scanning line */}
+              {isHovered && (
+                <div 
+                  className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"
+                  style={{ 
+                    transform: `translateY(${scanLine}%)`,
+                    transition: 'transform 0.1s linear'
+                  }}
+                ></div>
+              )}
+              
+              {/* Circular glow */}
+              <div className={`absolute inset-0 rounded-full bg-cyan-500/10 blur-xl transform transition-all duration-500 ${isHovered ? 'scale-110 opacity-100' : 'scale-90 opacity-50'}`}></div>
+              
+              {/* Data points on palm */}
+              <div className="absolute inset-0">
+                {Array.from({length: 12}).map((_, i) => (
+                  <div 
+                    key={i}
+                    className={`absolute w-1.5 h-1.5 rounded-full bg-cyan-400 transition-all duration-300 ${isHovered ? 'animate-pulse' : ''}`}
+                    style={{
+                      top: `${30 + Math.random() * 50}%`,
+                      left: `${30 + Math.random() * 50}%`,
+                      opacity: isHovered ? 0.8 : 0.4,
+                      animationDelay: `${i * 0.2}s`
+                    }}
+                  ></div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Text and status indicators */}
+            <div className="absolute -bottom-12 left-0 right-0 text-center">
+              <p className={`text-sm transition-all duration-300 ${isHovered ? 'text-cyan-400' : 'text-white/60'}`}>
+                {isHovered ? 'Scanning palm vein pattern...' : 'Hover to simulate scanning'}
+              </p>
+            </div>
+          </div>
+          
+          {/* Data cards */}
           <div className="absolute top-0 right-0 w-72 p-4 rounded-xl bg-gradient-to-b from-gray-900/80 to-gray-800/60 backdrop-blur-md border border-cyan-500/20 shadow-lg">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="text-white font-semibold">Secure Authentication</h3>
@@ -78,10 +182,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
           </div>
           
           {/* Anti-Spoofing Card */}
-          <div className="absolute bottom-24 left-8 w-64 p-4 rounded-xl bg-gradient-to-b from-gray-900/80 to-gray-800/60 backdrop-blur-md border border-cyan-500/20 shadow-lg">
+          <div className="absolute bottom-16 left-8 w-64 p-4 rounded-xl bg-gradient-to-b from-gray-900/80 to-gray-800/60 backdrop-blur-md border border-cyan-500/20 shadow-lg">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-lg bg-teal-500/20 text-teal-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 8-6 6-6-6"/></svg>
+                <Scan className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="text-white font-semibold">Anti-Spoofing</h3>
@@ -94,10 +198,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
             </div>
           </div>
           
-          {/* Scanning Card */}
-          <div className="absolute bottom-4 right-12 w-60 p-4 rounded-xl bg-gradient-to-b from-gray-900/80 to-gray-800/60 backdrop-blur-md border border-cyan-500/20 shadow-lg animate-pulse">
+          {/* Processing Card */}
+          <div className={`absolute bottom-4 right-12 w-60 p-4 rounded-xl bg-gradient-to-b from-gray-900/80 to-gray-800/60 backdrop-blur-md border border-cyan-500/20 shadow-lg transition-all duration-300 ${isHovered ? 'animate-pulse' : ''}`}>
             <div className="text-xs text-cyan-400/90 font-mono">
-              Scanning biometrics...
+              {isHovered ? 'Processing biometrics...' : 'Ready to scan...'}
             </div>
             <div className="mt-2 text-xs text-cyan-400/80 font-mono">
               ID: 44370<br/>
@@ -111,20 +215,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ navigate, mousePosition }) =>
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 flex flex-col items-center">
         <span className="text-white/50 text-sm mb-2">Scroll to explore</span>
         <div className="rounded-full bg-white/10 backdrop-blur-sm p-2 animate-bounce">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="text-cyan-400"><circle cx="12" cy="12" r="10"/><path d="m8 12 4 4 4-4"/><path d="M12 8v8"/></svg>
-        </div>
-      </div>
-      
-      {/* Brand icons at bottom */}
-      <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-16">
-        <div className="p-3 rounded-full bg-cyan-900/30 text-cyan-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-        </div>
-        <div className="p-3 rounded-full bg-blue-900/30 text-blue-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-        </div>
-        <div className="p-3 rounded-full bg-indigo-900/30 text-indigo-400">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-400">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="m8 12 4 4 4-4"/>
+            <path d="M12 8v8"/>
+          </svg>
         </div>
       </div>
     </div>
