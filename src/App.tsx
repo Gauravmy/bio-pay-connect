@@ -15,6 +15,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import FingerprintScan from "./pages/FingerprintScan";
+import PalmVeinScan from "./pages/PalmVeinScan";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +42,7 @@ const App = () => {
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/fingerprint-scan" element={<FingerprintScan />} />
+              <Route path="/palm-vein-scan" element={<PalmVeinScan />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
