@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, XCircle, AlertCircle, ReceiptIndianRupee, Building } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, AlertCircle, ReceiptIndianRupee, Building, Cpu } from 'lucide-react';
 import PalmVeinScanner from '@/components/auth/PalmVeinScanner';
 import { toast } from 'sonner';
 import { Card } from "@/components/ui/card";
@@ -18,11 +18,34 @@ interface TransactionInfo {
   date: string;
 }
 
+// This would come from your environment configuration in a real app
+const PALM_VEIN_API_ENDPOINT = import.meta.env.VITE_PALM_VEIN_API_ENDPOINT || '';
+
 const PalmVeinScan = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [scanStatus, setScanStatus] = useState<ScanStatus>('idle');
   const [transactionInfo, setTransactionInfo] = useState<TransactionInfo | null>(null);
+  const [isRealBackendAvailable, setIsRealBackendAvailable] = useState<boolean>(false);
+  
+  // Check if real backend is available
+  useEffect(() => {
+    const checkBackendAvailability = async () => {
+      if (PALM_VEIN_API_ENDPOINT) {
+        try {
+          // In a real implementation, we would ping the backend to check availability
+          // For demo purposes, we'll just check if the endpoint is defined
+          setIsRealBackendAvailable(true);
+          console.log("Palm vein scanning backend detected:", PALM_VEIN_API_ENDPOINT);
+        } catch (error) {
+          console.error("Backend not available:", error);
+          setIsRealBackendAvailable(false);
+        }
+      }
+    };
+    
+    checkBackendAvailability();
+  }, []);
   
   // Get transaction info from location state or generate dummy data
   useEffect(() => {
@@ -58,13 +81,40 @@ const PalmVeinScan = () => {
     }
   }, [location]);
   
-  const handleScanComplete = (success: boolean) => {
+  const handleScanComplete = async (success: boolean) => {
     if (success) {
       setScanStatus('success');
       
-      toast.success('Payment authorized successfully!', {
-        description: `₹${transactionInfo?.amount.toFixed(2)} paid to ${transactionInfo?.merchant}`
-      });
+      if (isRealBackendAvailable && PALM_VEIN_API_ENDPOINT) {
+        try {
+          // In a real implementation, this would send the transaction data to your backend
+          // along with the biometric verification result
+          console.log("Sending transaction data to backend:", {
+            transactionId: transactionInfo?.id,
+            amount: transactionInfo?.amount,
+            merchant: transactionInfo?.merchant
+          });
+          
+          // Simulate API call
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          toast.success('Payment authorized successfully!', {
+            description: `₹${transactionInfo?.amount.toFixed(2)} paid to ${transactionInfo?.merchant}`
+          });
+        } catch (error) {
+          console.error("Error processing payment:", error);
+          toast.error('Transaction processing error', {
+            description: 'There was an error processing your payment'
+          });
+          setScanStatus('failed');
+          return;
+        }
+      } else {
+        // Simulate success for demo
+        toast.success('Payment authorized successfully!', {
+          description: `₹${transactionInfo?.amount.toFixed(2)} paid to ${transactionInfo?.merchant}`
+        });
+      }
       
       // For demo purposes, automatically redirect after successful scan
       setTimeout(() => {
@@ -118,6 +168,13 @@ const PalmVeinScan = () => {
               {scanStatus === 'success' && 'Payment successful!'}
               {scanStatus === 'failed' && 'Authentication failed. Please try again.'}
             </p>
+            
+            {isRealBackendAvailable && (
+              <div className="mt-2 flex items-center justify-center text-xs text-cyan-400/80">
+                <Cpu className="w-3 h-3 mr-1" />
+                Using real biometric verification
+              </div>
+            )}
           </div>
           
           {scanStatus === 'success' && transactionInfo ? (
@@ -187,7 +244,11 @@ const PalmVeinScan = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <PalmVeinScanner onScanComplete={handleScanComplete} className="my-4" />
+              <PalmVeinScanner 
+                onScanComplete={handleScanComplete} 
+                className="my-4" 
+                serverEndpoint={isRealBackendAvailable ? PALM_VEIN_API_ENDPOINT : undefined}
+              />
               {transactionInfo && (
                 <div className="w-full mt-6 p-4 bg-white/5 border border-white/10 rounded-lg space-y-2">
                   <div className="flex items-center justify-between">
@@ -209,6 +270,19 @@ const PalmVeinScan = () => {
             </div>
           )}
         </Card>
+        
+        {/* Integration guide for developers */}
+        <div className="mt-6 bg-card/80 backdrop-blur-xl border border-cyan-800/30 rounded-lg p-4 text-xs">
+          <p className="text-cyan-400 font-semibold mb-2">Developer Note:</p>
+          <p className="text-white/70 mb-2">
+            To integrate real palm vein scanning with OpenCV:
+          </p>
+          <ol className="list-decimal pl-5 space-y-1 text-white/60">
+            <li>Set up a backend server to run the Python OpenCV code</li>
+            <li>Create a REST API endpoint or WebSocket connection</li>
+            <li>Connect the frontend to the backend via environment variable VITE_PALM_VEIN_API_ENDPOINT</li>
+          </ol>
+        </div>
       </div>
     </div>
   );

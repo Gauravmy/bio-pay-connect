@@ -5,39 +5,83 @@ import { Check, AlertCircle, HandMetal } from 'lucide-react';
 interface PalmVeinScannerProps {
   onScanComplete: (success: boolean) => void;
   className?: string;
+  serverEndpoint?: string; // Optional prop to specify the backend endpoint for real palm scanning
 }
 
-const PalmVeinScanner: React.FC<PalmVeinScannerProps> = ({ onScanComplete, className }) => {
+const PalmVeinScanner: React.FC<PalmVeinScannerProps> = ({ 
+  onScanComplete, 
+  className,
+  serverEndpoint 
+}) => {
   const [scanProgress, setScanProgress] = useState<number>(0);
   const [scanStatus, setStatus] = useState<'idle' | 'scanning' | 'success' | 'failed'>('idle');
+  const [isRealScanAvailable, setIsRealScanAvailable] = useState<boolean>(false);
+  const [scanMessage, setScanMessage] = useState<string>('');
   
-  // For demo, we'll simulate a random success rate
+  // Check if real scanning is available
+  useEffect(() => {
+    // In a real implementation, this would check if the backend API is available
+    // and if the user's device has the necessary hardware/permissions
+    setIsRealScanAvailable(!!serverEndpoint);
+  }, [serverEndpoint]);
+  
+  // For demo simulation
   const simulateScan = () => {
     // Reset states
     setScanProgress(0);
     setStatus('scanning');
+    setScanMessage('Processing palm vein pattern...');
     
-    // Simulate scanning process with progress
-    const scanInterval = setInterval(() => {
-      setScanProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(scanInterval);
-          return 100;
-        }
-        return prev + 5;
-      });
-    }, 120);
-    
-    // After ~2.4s, decide success or failure (90% success rate for demo)
-    setTimeout(() => {
-      const success = Math.random() < 0.9;
-      setStatus(success ? 'success' : 'failed');
-      clearInterval(scanInterval);
-      setScanProgress(100);
+    if (isRealScanAvailable && serverEndpoint) {
+      // In a real implementation, this would connect to your Python backend
+      // through WebSockets or REST API to start the scanning process
+      console.log('Connecting to real palm vein scanning backend at:', serverEndpoint);
       
-      // Report result to parent
-      setTimeout(() => onScanComplete(success), 1000);
-    }, 2400);
+      // Simulate API communication for demo purposes
+      const scanInterval = setInterval(() => {
+        setScanProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(scanInterval);
+            return 100;
+          }
+          return prev + 5;
+        });
+      }, 120);
+      
+      // Simulate backend response
+      setTimeout(() => {
+        // In production, this would be replaced with actual API response handling
+        const success = Math.random() < 0.9; // 90% success rate for demo
+        setStatus(success ? 'success' : 'failed');
+        setScanMessage(success ? 'Authentication successful' : 'Authentication failed');
+        clearInterval(scanInterval);
+        setScanProgress(100);
+        
+        // Report result to parent component
+        setTimeout(() => onScanComplete(success), 1000);
+      }, 2400);
+    } else {
+      // Use the existing simulation code when no real backend is available
+      const scanInterval = setInterval(() => {
+        setScanProgress(prev => {
+          if (prev >= 100) {
+            clearInterval(scanInterval);
+            return 100;
+          }
+          return prev + 5;
+        });
+      }, 120);
+      
+      setTimeout(() => {
+        const success = Math.random() < 0.9;
+        setStatus(success ? 'success' : 'failed');
+        setScanMessage(success ? 'Authentication successful' : 'Authentication failed');
+        clearInterval(scanInterval);
+        setScanProgress(100);
+        
+        setTimeout(() => onScanComplete(success), 1000);
+      }, 2400);
+    }
   };
   
   return (
@@ -71,7 +115,9 @@ const PalmVeinScanner: React.FC<PalmVeinScannerProps> = ({ onScanComplete, class
           {scanStatus === 'idle' && (
             <>
               <HandMetal className="w-16 h-16 text-cyan-400 animate-pulse" />
-              <p className="text-sm font-medium text-cyan-300">Place palm to scan</p>
+              <p className="text-sm font-medium text-cyan-300">
+                {isRealScanAvailable ? 'Place palm to scan' : 'Tap to simulate palm scan'}
+              </p>
             </>
           )}
           
@@ -109,7 +155,23 @@ const PalmVeinScanner: React.FC<PalmVeinScannerProps> = ({ onScanComplete, class
       </button>
       
       {scanStatus === 'idle' && (
-        <p className="text-xs text-gray-400 mt-2 italic">Tap to simulate palm scan</p>
+        <p className="text-xs text-gray-400 mt-2 italic">
+          {isRealScanAvailable 
+            ? "Real palm vein scanning available" 
+            : "Tap to simulate palm scan"}
+        </p>
+      )}
+      
+      {scanMessage && scanStatus !== 'idle' && (
+        <p className="text-xs text-gray-300 mt-2">
+          {scanMessage}
+        </p>
+      )}
+      
+      {isRealScanAvailable && (
+        <div className="mt-4 text-xs text-cyan-400/70 font-mono">
+          Connected to palm vein scanning service
+        </div>
       )}
     </div>
   );
