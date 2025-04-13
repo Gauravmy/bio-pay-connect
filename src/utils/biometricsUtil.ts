@@ -1,7 +1,7 @@
 
 /**
  * Utility functions for biometric authentication
- * This serves as a bridge between the frontend and a potential backend
+ * This serves as a bridge between the frontend and a backend
  * running OpenCV for palm vein recognition
  */
 
@@ -26,11 +26,11 @@ interface BiometricScanOptions {
 
 /**
  * Authenticate a user with biometric data
- * In a real implementation, this would connect to a backend service
- * This is a placeholder for future implementation
+ * Connects to a backend service running OpenCV for palm vein scanning
  */
 export async function authenticateWithBiometrics(
-  options: BiometricScanOptions
+  options: BiometricScanOptions,
+  imageData?: string // Base64 encoded image data when available
 ): Promise<BiometricAuthResponse> {
   const { endpoint, scanType, userId, transactionData } = options;
   
@@ -53,34 +53,67 @@ export async function authenticateWithBiometrics(
     console.log(`Connecting to biometric authentication backend at ${endpoint}`);
     console.log(`Using scan type: ${scanType}`);
     
-    // In a real implementation, this would be an actual API call
-    // to your backend running the OpenCV palm vein scanning code
+    // Prepare the request payload
+    const payload: Record<string, any> = {
+      scanType,
+      userId: userId || undefined,
+    };
     
-    // For now, we'll just simulate a network request
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Simulate a 90% success rate
-    const success = Math.random() < 0.9;
-    
-    if (success) {
-      return {
-        success: true,
-        message: 'Biometric authentication successful',
-        token: 'jwt-token-' + Math.random().toString(36).substring(2),
-        userId: userId || 'user-' + Math.random().toString(36).substring(2)
-      };
-    } else {
-      return {
-        success: false,
-        message: 'Biometric authentication failed'
-      };
+    // Add transaction data if available
+    if (transactionData) {
+      payload.transactionData = transactionData;
     }
+    
+    // Add image data if available (for real palm vein scanning)
+    if (imageData) {
+      payload.imageData = imageData;
+    }
+    
+    // Make the API request to the backend
+    const response = await fetch(`${endpoint}/authenticate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error during biometric authentication:', error);
     return {
       success: false,
       message: 'Error during biometric authentication'
     };
+  }
+}
+
+/**
+ * Check if the biometric scanning backend is available
+ */
+export async function checkBackendAvailability(endpoint?: string): Promise<boolean> {
+  if (!endpoint) {
+    return false;
+  }
+  
+  try {
+    // Try to connect to the health check endpoint
+    const response = await fetch(`${endpoint}/health`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    return response.ok;
+  } catch (error) {
+    console.error('Backend not available:', error);
+    return false;
   }
 }
 
