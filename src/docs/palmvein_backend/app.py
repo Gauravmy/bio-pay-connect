@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import cv2
@@ -14,7 +13,7 @@ import jwt
 import bcrypt
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend requests
+CORS(app)
 
 # Initialize MediaPipe Hands module
 mp_hands = mp.solutions.hands
@@ -27,7 +26,52 @@ SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'your-secret-key-for-development')
 # Mock database for development
 user_db = {}
 tokens_db = {}
-rate_limit_db = {}  # For rate limiting
+rate_limit_db = {}
+
+# Dummy consumer and merchant data for testing
+consumer_details = {"name": "John Doe", "account_number": "123456789", "balance": "$1000"}
+merchant_details = {"name": "Merchant XYZ", "store_id": "ABC123"}
+payment_request_allowed = False
+
+def process_palm_image(image_data, payment_request_allowed=False):
+    """Process the palm vein image for authentication"""
+    try:
+        # Decode base64 image
+        encoded_data = image_data.split(',')[1] if ',' in image_data else image_data
+        nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        
+        # Convert to RGB (MediaPipe uses RGB)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Get hand landmarks
+        results = hands.process(frame_rgb)
+        
+        if results.multi_hand_landmarks:
+            # Extract features from the hand landmarks
+            hash_data = []
+            for hand_landmarks in results.multi_hand_landmarks:
+                # Draw landmarks (for debugging/development)
+                mp_draw.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+                
+                # Create a hash from landmark coordinates
+                for landmark in hand_landmarks.landmark:
+                    hash_data.append(f"{landmark.x:.4f}{landmark.y:.4f}{landmark.z:.4f}")
+            
+            # Create a palm hash for biometric verification
+            palm_hash = bcrypt.hashpw(''.join(hash_data).encode(), bcrypt.gensalt()).decode()
+            
+            # For demonstration, always return success if hand is detected
+            # In production, you would compare this hash with stored hashes
+            return True, palm_hash, {
+                'consumer': consumer_details,
+                'merchant': merchant_details if payment_request_allowed else None
+            }
+        else:
+            return False, None, {'error': 'No hand detected in image'}
+            
+    except Exception as e:
+        return False, None, {'error': f'Image processing error: {str(e)}'}
 
 # Middleware for rate limiting
 def check_rate_limit(ip_address, max_requests=10, window_seconds=60):
@@ -48,34 +92,6 @@ def check_rate_limit(ip_address, max_requests=10, window_seconds=60):
     # Record this request
     rate_limit_db[ip_address].append(now)
     return True
-
-# Process the palm vein image for authentication
-def process_palm_image(image_data):
-    # Decode base64 image
-    encoded_data = image_data.split(',')[1] if ',' in image_data else image_data
-    nparr = np.frombuffer(base64.b64decode(encoded_data), np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    
-    # Convert to RGB (MediaPipe uses RGB)
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    
-    # Process the image with MediaPipe
-    results = hands.process(img_rgb)
-    
-    # Check if hands were detected
-    if results.multi_hand_landmarks:
-        # Extract features (in a real system, this would be more sophisticated)
-        # Here we'll just create a simple "hash" from the coordinates
-        hash_data = []
-        for hand_landmarks in results.multi_hand_landmarks:
-            for landmark in hand_landmarks.landmark:
-                hash_data.append(f"{landmark.x:.4f}{landmark.y:.4f}{landmark.z:.4f}")
-        
-        # Create a simple hash (in production, use stronger algorithms)
-        palm_hash = bcrypt.hashpw(''.join(hash_data).encode(), bcrypt.gensalt()).decode()
-        return True, palm_hash
-    else:
-        return False, None
 
 # Create JWT tokens
 def generate_tokens(user_id):
@@ -173,76 +189,55 @@ def authenticate():
         user_id = data.get('userId')
         scan_type = data.get('scanType', 'palm-vein')
         
-        # For testing without a camera
         if not image_data:
-            # Simulate authentication for demo
-            success = (time.time() % 10) < 9  # 90% success rate
-            
+            # Simulate authentication for testing without camera
+            success = True  # For testing, always succeed
             if success:
-                # Generate a new user ID if not provided
                 if not user_id:
                     user_id = str(uuid.uuid4())
-                    user_db[user_id] = {
-                        'biometric_hash': 'simulated-hash',
-                        'created_at': time.time()
-                    }
-                
-                # Generate tokens
                 access_token, refresh_token = generate_tokens(user_id)
-                
                 return jsonify({
                     'success': True,
                     'message': 'Authentication successful (simulated)',
                     'token': access_token,
                     'refreshToken': refresh_token,
-                    'userId': user_id
+                    'userId': user_id,
+                    'consumerDetails': consumer_details,
+                    'merchantDetails': merchant_details
                 })
-            else:
-                return jsonify({
-                    'success': False,
-                    'message': 'Authentication failed (simulated)'
-                }), 401
         
-        # Real biometric authentication with image data
-        success, palm_hash = process_palm_image(image_data)
+        # Process the palm vein image
+        success, palm_hash, details = process_palm_image(image_data, payment_request_allowed=True)
         
         if not success:
             return jsonify({
                 'success': False,
-                'message': 'No hand detected in the image'
+                'message': details.get('error', 'Authentication failed'),
             }), 400
         
-        # In a real implementation, we would compare the hash with stored hashes
-        # Here we're just registering a new user if the ID doesn't exist
-        if user_id and user_id in user_db:
-            # In reality, we would use a proper comparison method here
-            # This is simplified for the demo
-            auth_success = True  # Simulated match
-        else:
-            # Create a new user if user_id is not provided
+        # Generate new user ID if not provided
+        if not user_id:
             user_id = str(uuid.uuid4())
-            user_db[user_id] = {
-                'biometric_hash': palm_hash,
-                'created_at': time.time()
-            }
-            auth_success = True
         
-        if auth_success:
-            # Generate tokens
-            access_token, refresh_token = generate_tokens(user_id)
-            
-            return jsonify({
-                'success': True,
-                'message': 'Authentication successful',
-                'token': access_token,
-                'refreshToken': refresh_token,
-                'userId': user_id
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'message': 'Authentication failed'
-            }), 401
+        # Store the biometric hash
+        user_db[user_id] = {
+            'biometric_hash': palm_hash,
+            'created_at': time.time()
+        }
+        
+        # Generate authentication tokens
+        access_token, refresh_token = generate_tokens(user_id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Authentication successful',
+            'token': access_token,
+            'refreshToken': refresh_token,
+            'userId': user_id,
+            'consumerDetails': details.get('consumer'),
+            'merchantDetails': details.get('merchant')
+        })
+        
     except Exception as e:
         app.logger.error(f"Error in authentication: {str(e)}")
         return jsonify({
@@ -339,9 +334,5 @@ def health_check():
     })
 
 if __name__ == '__main__':
-    # Get port from environment variable or use 5000 as default
     port = int(os.environ.get('PORT', 5000))
-    
-    # In production, use a proper WSGI server like gunicorn
-    # For development, use Flask's built-in server with debug mode
     app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_DEBUG', 'False').lower() == 'true')
